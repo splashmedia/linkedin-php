@@ -1,0 +1,19 @@
+{
+    "name": "splashmedia/linkedin-oauth",
+    "type": "library",
+    "description": "LinkedIn OAuth client based on abrah.am's Twitter OAuth library",
+    "keywords": ["linkedin", "api client"],
+    "homepage": "https://github.com/splashmedia/linkedin-oauth",
+    "license": "MIT",
+    "authors": [
+        {"name": "Daniel Cousineau", "email": "dcousineau@splashmedia.com"},
+        {"name": "John Syrinek", "email": "jsyrinek@splashmedia.com"}
+    ],
+    "require": {
+        "php": ">=5.3.2",
+        "ext-curl": "*"
+    },
+    "autoload": {
+        "classmap": ["lib/"]
+    }
+}
