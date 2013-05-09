@@ -1,8 +1,8 @@
 {
-    "name": "splashmedia/linkedin-oauth",
+    "name": "splashmedia/linkedin-php",
     "type": "library",
-    "description": "LinkedIn OAuth client based on abrah.am's Twitter OAuth library",
-    "keywords": ["linkedin", "api client"],
+    "description": "LinkedIn client library",
+    "keywords": ["linkedin", "client"],
     "homepage": "https://github.com/splashmedia/linkedin-oauth",
     "license": "MIT",
     "authors": [
@@ -14,6 +14,6 @@
         "ext-curl": "*"
     },
     "autoload": {
-        "classmap": ["lib/"]
+        "psr-0": {"Splash\\LinkedIn": "lib/"}
     }
 }
