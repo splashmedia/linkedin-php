@@ -37,10 +37,10 @@ class LinkedInOAuth {
     function lastAPICall() { return $this->last_api_call; }
 
     function __construct($consumer_key, $consumer_secret, $oauth_token = NULL, $oauth_token_secret = NULL) {/*{{{*/
-        $this->sha1_method = new OAuthSignatureMethod_HMAC_SHA1();
-        $this->consumer = new OAuthConsumer($consumer_key, $consumer_secret);
+        $this->sha1_method = new \OAuthSignatureMethod_HMAC_SHA1();
+        $this->consumer = new \OAuthConsumer($consumer_key, $consumer_secret);
         if (!empty($oauth_token) && !empty($oauth_token_secret)) {
-            $this->token = new OAuthConsumer($oauth_token, $oauth_token_secret);
+            $this->token = new \OAuthConsumer($oauth_token, $oauth_token_secret);
         } else {
             $this->token = NULL;
         }
@@ -57,7 +57,7 @@ class LinkedInOAuth {
         //error_log('OAuth request: '.$requesturl);
         //error_log('OAuth Response: '.print_r($r, true));
         $token = $this->oAuthParseResponse($r);
-        $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
+        $this->token = new \OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
         return $token;
     }/*}}}*/
 
@@ -101,12 +101,12 @@ class LinkedInOAuth {
         $r = $this->oAuthRequest($this->accessTokenURL(), array('oauth_verifier' => $verifier), 'GET');
         //error_log('$r: '.print_r($r, true));
         $token = $this->oAuthParseResponse($r);
-        $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
+        $this->token = new \OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
         return $token;
     }/*}}}*/
 
     function setOAuthToken( $key, $secret ) {
-        $this->token = new OAuthConsumer($key, $secret);
+        $this->token = new \OAuthConsumer($key, $secret);
     }
     
     /**
@@ -114,7 +114,7 @@ class LinkedInOAuth {
     */
     function oAuthRequest($url, $args = array(), $method = NULL) {/*{{{*/
         if (empty($method)) $method = empty($args) ? "GET" : "POST";
-        $req = OAuthRequest::from_consumer_and_token($this->consumer, $this->token, $method, $url, $args);
+        $req = \OAuthRequest::from_consumer_and_token($this->consumer, $this->token, $method, $url, $args);
         $req->sign_request($this->sha1_method, $this->consumer, $this->token);
         switch ($method) {
             case 'GET': return $this->http($req->to_url());
