@@ -48,15 +48,15 @@ class Client {
      * @param string $resource The relative URI for the resource requested (e.g. "/v1/people/~:(firstName,lastName)")
      * @param array $payload
      * @param string $method
+     * @param array $type Headers : multipart/form, application/json, application/xml
      * @return array
      */
-    public function fetch($resource, array $payload = array(), $method = 'GET') {
+    public function fetch($resource, array $payload = array(), $method = 'GET', $type = array('Content-type: multipart/form-data')) {
         $url = $this->domain . $resource;
 
         $payload = array('oauth2_access_token' => $this->getAccessToken(), 'format' => 'json')
-                 + $payload;
-
-        return $this->_request($url, $payload, $method);
+                + $payload;
+        return $this->_request($url, $payload, $method, $type);
     }
 
     /**
@@ -114,26 +114,44 @@ class Client {
      * @param string $url full url
      * @param array $payload Payload values to passed in through GET or POST parameters
      * @param string $method HTTP method for request (GET, PUT, POST, ...)
+     * @param array $type Headers : multipart/form, application/json, application/xml
      * @return array JSON-decoded response
      * @throws Exception
      */
-    protected function _request($url, array $payload = array(), $method = 'GET') {
+
+    protected function _request($url, array $payload = array(), $method = 'GET', $type = array('Content-type: multipart/form-data')) {
         $ch = $this->getCurl();
-
-        if (!empty($payload) && $method == 'GET') {
-            $url .= "?" . http_build_query($payload);
+        if(!empty($payload['oauth2_access_token'])){
+            $url = $url.'?oauth2_access_token='.$payload['oauth2_access_token'];            
         }
-
+        if (!empty($payload) && $method == 'GET') {
+            $url .= "&" . http_build_query($payload);
+        }
         curl_setopt_array($ch, array(
             CURLOPT_URL => $url,
         ));
+        curl_setopt($ch, CURLOPT_VERBOSE, true);
 
         switch (strtoupper($method)) {
             case 'POST':
                 curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: multipart/form-data'));
-                if (!empty($payload))
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $type);
+                if (!empty($payload) && stripos($type[0], "multipart/form-data")) {
                     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($payload));
+                } 
+                else if (!empty($payload) && stripos($type[0], "application/xml")) {
+                    curl_setopt($ch, CURLOPT_POST, false);
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload['message']);
+                    curl_setopt(
+                            $ch, 
+                            CURLOPT_HTTPHEADER, 
+                            array(
+                                $type[0],
+                                'Content-length: ' . strlen($payload['message'])
+                            )
+                    );
+                }
                 break;
             case 'PUT':
                 curl_setopt($ch, CURLOPT_POST, false);
@@ -151,7 +169,7 @@ class Client {
         }
 
         $body = curl_exec($ch);
-
+        
         $errno = curl_errno($ch);
         if ($errno !== 0) {
             throw new Exception(sprintf("Error connecting to LinkedIn: [%s] %s", $errno, curl_error($ch)), $errno);
@@ -171,6 +189,7 @@ class Client {
 
         return $response;
     }
+
 
     /**
      * @param string $access_token
